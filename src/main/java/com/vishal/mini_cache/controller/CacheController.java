@@ -24,6 +24,10 @@ public class CacheController {
 
         return "Stored Successfully";
     }
+    @GetMapping("/size")
+    public int size() {
+        return cacheService.size();
+    }
 
     @GetMapping("/{key}")
     public Object get(@PathVariable String key) {
