@@ -1,16 +1,18 @@
 package com.vishal.mini_cache.dto;
 
 public class CacheRequest {
+
     private String key;
+
     private String value;
 
-    public CacheRequest(){
-
+    public CacheRequest() {
     }
 
     public String getKey() {
         return key;
     }
+
     public void setKey(String key) {
         this.key = key;
     }
@@ -18,6 +20,7 @@ public class CacheRequest {
     public String getValue() {
         return value;
     }
+
     public void setValue(String value) {
         this.value = value;
     }
