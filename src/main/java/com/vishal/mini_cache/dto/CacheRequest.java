@@ -3,7 +3,6 @@ package com.vishal.mini_cache.dto;
 public class CacheRequest {
 
     private String key;
-
     private String value;
 
     public CacheRequest() {

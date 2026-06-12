@@ -15,7 +15,8 @@ public class CacheController {
     }
 
     @PostMapping
-    public String put(@RequestBody CacheRequest request) {
+    public String put(
+            @RequestBody CacheRequest request) {
 
         cacheService.put(
                 request.getKey(),
@@ -24,22 +25,25 @@ public class CacheController {
 
         return "Stored Successfully";
     }
-    @GetMapping("/size")
-    public int size() {
-        return cacheService.size();
-    }
 
     @GetMapping("/{key}")
-    public Object get(@PathVariable String key) {
+    public Object get(
+            @PathVariable String key) {
 
         return cacheService.get(key);
     }
 
     @DeleteMapping("/{key}")
-    public String delete(@PathVariable String key) {
+    public String delete(
+            @PathVariable String key) {
 
         cacheService.delete(key);
 
         return "Deleted Successfully";
+    }
+
+    @GetMapping("/size")
+    public int size() {
+        return cacheService.size();
     }
 }
