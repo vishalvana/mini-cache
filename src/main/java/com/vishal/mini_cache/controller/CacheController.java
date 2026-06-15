@@ -1,6 +1,7 @@
 package com.vishal.mini_cache.controller;
 
 import com.vishal.mini_cache.dto.CacheRequest;
+import com.vishal.mini_cache.dto.StatsResponse;
 import com.vishal.mini_cache.service.CacheService;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,5 +46,10 @@ public class CacheController {
     @GetMapping("/size")
     public int size() {
         return cacheService.size();
+    }
+
+    @GetMapping("/stats")
+    public StatsResponse stats() {
+        return cacheService.getStats();
     }
 }

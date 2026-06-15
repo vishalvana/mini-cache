@@ -1,6 +1,8 @@
 package com.vishal.mini_cache.service;
 
 import com.vishal.mini_cache.cache.Cache;
+import com.vishal.mini_cache.dto.StatsResponse;
+import com.vishal.mini_cache.model.CacheStats;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -26,5 +28,19 @@ public class CacheService {
 
     public int size() {
         return cache.size();
+    }
+
+    public StatsResponse getStats() {
+
+        CacheStats stats =
+                cache.getStats();
+
+        return new StatsResponse(
+                stats.getHits(),
+                stats.getMisses(),
+                stats.getEvictions(),
+                stats.getHitRate(),
+                cache.size()
+        );
     }
 }

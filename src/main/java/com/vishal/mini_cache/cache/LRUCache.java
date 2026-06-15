@@ -3,13 +3,14 @@ package com.vishal.mini_cache.cache;
 import com.vishal.mini_cache.cache.lru.CacheNode;
 import com.vishal.mini_cache.cache.lru.DoublyLinkedList;
 import com.vishal.mini_cache.model.CacheEntry;
+import com.vishal.mini_cache.model.CacheStats;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class LRUCache<K, V> implements Cache<K, V> {
 
-    private static final long DEFAULT_TTL = 60000;
+    private static final long DEFAULT_TTL = 60_000;
 
     private final int capacity;
 
@@ -17,10 +18,13 @@ public class LRUCache<K, V> implements Cache<K, V> {
 
     private final DoublyLinkedList<K, V> list;
 
+    private final CacheStats stats;
+
     public LRUCache(int capacity) {
         this.capacity = capacity;
         this.storage = new HashMap<>();
         this.list = new DoublyLinkedList<>();
+        this.stats = new CacheStats();
     }
 
     @Override
@@ -60,6 +64,8 @@ public class LRUCache<K, V> implements Cache<K, V> {
                         lruNode.getKey()
                 );
 
+                stats.recordEviction();
+
                 System.out.println(
                         "Evicted Key : "
                                 + lruNode.getKey()
@@ -89,6 +95,9 @@ public class LRUCache<K, V> implements Cache<K, V> {
                 storage.get(key);
 
         if (node == null) {
+
+            stats.recordMiss();
+
             return null;
         }
 
@@ -104,6 +113,8 @@ public class LRUCache<K, V> implements Cache<K, V> {
 
             storage.remove(key);
 
+            stats.recordMiss();
+
             System.out.println(
                     "Expired Key : "
                             + key
@@ -115,6 +126,8 @@ public class LRUCache<K, V> implements Cache<K, V> {
         entry.updateAccessMetadata();
 
         list.moveToEnd(node);
+
+        stats.recordHit();
 
         return entry.getValue();
     }
@@ -133,5 +146,10 @@ public class LRUCache<K, V> implements Cache<K, V> {
     @Override
     public int size() {
         return storage.size();
+    }
+
+    @Override
+    public CacheStats getStats() {
+        return stats;
     }
 }
