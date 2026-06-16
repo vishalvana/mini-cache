@@ -14,4 +14,5 @@ public interface Cache<K, V> {
 
     CacheStats getStats();
 
+    void cleanupExpiredEntries();
 }

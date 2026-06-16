@@ -188,4 +188,34 @@ public class LRUCache<K, V> implements Cache<K, V> {
     public CacheStats getStats() {
         return stats;
     }
+    @Override
+    public void cleanupExpiredEntries() {
+
+        lock.lock();
+
+        try {
+
+            long now = System.currentTimeMillis();
+
+            storage.entrySet().removeIf(entry -> {
+
+                CacheNode<K, V> node =
+                        entry.getValue();
+
+                if (now >
+                        node.getEntry()
+                                .getExpiryTime()) {
+
+                    list.remove(node);
+
+                    return true;
+                }
+
+                return false;
+            });
+
+        } finally {
+            lock.unlock();
+        }
+    }
 }
