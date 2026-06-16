@@ -7,6 +7,7 @@ import com.vishal.mini_cache.model.CacheStats;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class LRUCache<K, V> implements Cache<K, V> {
 
@@ -20,132 +21,167 @@ public class LRUCache<K, V> implements Cache<K, V> {
 
     private final CacheStats stats;
 
+    private final ReentrantLock lock;
+
     public LRUCache(int capacity) {
+
         this.capacity = capacity;
         this.storage = new HashMap<>();
         this.list = new DoublyLinkedList<>();
         this.stats = new CacheStats();
+        this.lock = new ReentrantLock();
     }
 
     @Override
     public void put(K key, V value) {
 
-        long now = System.currentTimeMillis();
+        lock.lock();
 
-        if (storage.containsKey(key)) {
+        try {
 
-            CacheNode<K, V> existingNode =
-                    storage.get(key);
+            long now = System.currentTimeMillis();
 
-            CacheEntry<V> updatedEntry =
+            if (storage.containsKey(key)) {
+
+                CacheNode<K, V> existingNode =
+                        storage.get(key);
+
+                CacheEntry<V> updatedEntry =
+                        new CacheEntry<>(
+                                value,
+                                now,
+                                now + DEFAULT_TTL
+                        );
+
+                existingNode.setEntry(updatedEntry);
+
+                list.moveToEnd(existingNode);
+
+                return;
+            }
+
+            if (storage.size() >= capacity) {
+
+                CacheNode<K, V> lruNode =
+                        list.getHead();
+
+                if (lruNode != null) {
+
+                    list.remove(lruNode);
+
+                    storage.remove(
+                            lruNode.getKey()
+                    );
+
+                    stats.recordEviction();
+
+                    System.out.println(
+                            "Evicted Key : "
+                                    + lruNode.getKey()
+                    );
+                }
+            }
+
+            CacheEntry<V> entry =
                     new CacheEntry<>(
                             value,
                             now,
                             now + DEFAULT_TTL
                     );
 
-            existingNode.setEntry(updatedEntry);
+            CacheNode<K, V> node =
+                    new CacheNode<>(key, entry);
 
-            list.moveToEnd(existingNode);
+            list.addLast(node);
 
-            return;
+            storage.put(key, node);
+
+        } finally {
+            lock.unlock();
         }
-
-        if (storage.size() >= capacity) {
-
-            CacheNode<K, V> lruNode =
-                    list.getHead();
-
-            if (lruNode != null) {
-
-                list.remove(lruNode);
-
-                storage.remove(
-                        lruNode.getKey()
-                );
-
-                stats.recordEviction();
-
-                System.out.println(
-                        "Evicted Key : "
-                                + lruNode.getKey()
-                );
-            }
-        }
-
-        CacheEntry<V> entry =
-                new CacheEntry<>(
-                        value,
-                        now,
-                        now + DEFAULT_TTL
-                );
-
-        CacheNode<K, V> node =
-                new CacheNode<>(key, entry);
-
-        list.addLast(node);
-
-        storage.put(key, node);
     }
 
     @Override
     public V get(K key) {
 
-        CacheNode<K, V> node =
-                storage.get(key);
+        lock.lock();
 
-        if (node == null) {
+        try {
 
-            stats.recordMiss();
+            CacheNode<K, V> node =
+                    storage.get(key);
 
-            return null;
+            if (node == null) {
+
+                stats.recordMiss();
+
+                return null;
+            }
+
+            CacheEntry<V> entry =
+                    node.getEntry();
+
+            long now =
+                    System.currentTimeMillis();
+
+            if (now > entry.getExpiryTime()) {
+
+                list.remove(node);
+
+                storage.remove(key);
+
+                stats.recordMiss();
+
+                System.out.println(
+                        "Expired Key : "
+                                + key
+                );
+
+                return null;
+            }
+
+            entry.updateAccessMetadata();
+
+            list.moveToEnd(node);
+
+            stats.recordHit();
+
+            return entry.getValue();
+
+        } finally {
+            lock.unlock();
         }
-
-        CacheEntry<V> entry =
-                node.getEntry();
-
-        long now =
-                System.currentTimeMillis();
-
-        if (now > entry.getExpiryTime()) {
-
-            list.remove(node);
-
-            storage.remove(key);
-
-            stats.recordMiss();
-
-            System.out.println(
-                    "Expired Key : "
-                            + key
-            );
-
-            return null;
-        }
-
-        entry.updateAccessMetadata();
-
-        list.moveToEnd(node);
-
-        stats.recordHit();
-
-        return entry.getValue();
     }
 
     @Override
     public void remove(K key) {
 
-        CacheNode<K, V> node =
-                storage.remove(key);
+        lock.lock();
 
-        if (node != null) {
-            list.remove(node);
+        try {
+
+            CacheNode<K, V> node =
+                    storage.remove(key);
+
+            if (node != null) {
+                list.remove(node);
+            }
+
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
     public int size() {
-        return storage.size();
+
+        lock.lock();
+
+        try {
+            return storage.size();
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
