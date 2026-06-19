@@ -17,6 +17,24 @@ public class CacheService {
     public void put(String key, String value) {
         cache.put(key, value);
     }
+    public void put(
+            String key,
+            String value,
+            Long ttlSeconds) {
+
+        if (ttlSeconds == null) {
+
+            cache.put(key, value);
+
+            return;
+        }
+
+        cache.put(
+                key,
+                value,
+                ttlSeconds * 1000
+        );
+    }
 
     public Object get(String key) {
         return cache.get(key);

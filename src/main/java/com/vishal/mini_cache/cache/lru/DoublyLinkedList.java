@@ -1,18 +1,13 @@
 package com.vishal.mini_cache.cache.lru;
 
+import lombok.Getter;
+
+@Getter
 public class DoublyLinkedList<K, V> {
 
     private CacheNode<K, V> head;
 
     private CacheNode<K, V> tail;
-
-    public CacheNode<K, V> getHead() {
-        return head;
-    }
-
-    public CacheNode<K, V> getTail() {
-        return tail;
-    }
 
     public void addLast(CacheNode<K, V> node) {
 

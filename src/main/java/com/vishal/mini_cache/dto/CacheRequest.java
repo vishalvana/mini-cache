@@ -3,10 +3,10 @@ package com.vishal.mini_cache.dto;
 public class CacheRequest {
 
     private String key;
+
     private String value;
 
-    public CacheRequest() {
-    }
+    private Long ttlSeconds;
 
     public String getKey() {
         return key;
@@ -22,5 +22,13 @@ public class CacheRequest {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public Long getTtlSeconds() {
+        return ttlSeconds;
+    }
+
+    public void setTtlSeconds(Long ttlSeconds) {
+        this.ttlSeconds = ttlSeconds;
     }
 }

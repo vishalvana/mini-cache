@@ -33,6 +33,25 @@ public class InMemoryCache<K, V>
     }
 
     @Override
+    public void put(
+            K key,
+            V value,
+            long ttlMillis) {
+
+        long now =
+                System.currentTimeMillis();
+
+        CacheEntry<V> entry =
+                new CacheEntry<>(
+                        value,
+                        now,
+                        now + ttlMillis
+                );
+
+        storage.put(key, entry);
+    }
+
+    @Override
     public V get(K key) {
 
         CacheEntry<V> entry =

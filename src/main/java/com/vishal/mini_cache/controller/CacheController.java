@@ -30,11 +30,13 @@ public class CacheController {
 
         cacheService.put(
                 request.getKey(),
-                request.getValue()
+                request.getValue(),
+                request.getTtlSeconds()
         );
 
         return "Stored Successfully";
     }
+
 
     @Operation(
             summary = "Retrieve value by key"
@@ -45,6 +47,7 @@ public class CacheController {
 
         return cacheService.get(key);
     }
+
 
     @Operation(
             summary = "Delete cache entry"

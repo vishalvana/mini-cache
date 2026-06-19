@@ -8,6 +8,7 @@ class MiniCacheApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }
