@@ -15,7 +15,9 @@ public class CacheCleanupService {
         this.cache = cache;
     }
 
-    @Scheduled(fixedRate = 30000)
+
+
+    @Scheduled(fixedRate = 20000)
     public void cleanup() {
 
         cache.cleanupExpiredEntries();
